@@ -162,6 +162,33 @@
 > }
 > ```
 
+### 통합 테스트 환경 추가
+> ```groovy
+> sourceSets {
+>     integrationTest {
+>         java.srcDir "$projectDir/src/integrationTest/java"
+>         resources.srcDir "$projectDir/src/integrationTest/resources"
+>         compileClasspath += main.output + test.output
+>         runtimeClasspath += main.output + test.output
+>     }
+> }
+> 
+> configurations {
+>     integrationTestImplementation.extendsFrom implementation
+>     integrationTestImplementation.extendsFrom testImplementation
+>     integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+> }
+> 
+> task integrationTest(type: Test) {
+>     testClassesDirs = sourceSets.integrationTest.output.classesDirs
+>     classpath = sourceSets.integrationTest.runtimeClasspath
+>     useJUnitPlatform()
+> }
+> 
+> check.dependsOn integrationTest
+> ```
+> 참조사이트: [[java,gradle]단위 테스트(unit test)와 통합 테스트(integration test) 환경 분리](https://velog.io/@mu1616/javagradle%EB%8B%A8%EC%9C%84-%ED%85%8C%EC%8A%A4%ED%8A%B8unit-test%EC%99%80-%ED%86%B5%ED%95%A9-%ED%85%8C%EC%8A%A4%ED%8A%B8integration-test-%ED%99%98%EA%B2%BD-%EB%B6%84%EB%A6%AC)
+
 ### 테스트 하나만 지정해서 실행
 > `gradle test --tests "a.b.c.MyTestFile.mySingleTest"`
 
