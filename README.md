@@ -186,6 +186,7 @@
 > }
 > 
 > check.dependsOn integrationTest
+> test.dependsOn integrationTest
 > ```
 > 참조사이트: [[java,gradle]단위 테스트(unit test)와 통합 테스트(integration test) 환경 분리](https://velog.io/@mu1616/javagradle%EB%8B%A8%EC%9C%84-%ED%85%8C%EC%8A%A4%ED%8A%B8unit-test%EC%99%80-%ED%86%B5%ED%95%A9-%ED%85%8C%EC%8A%A4%ED%8A%B8integration-test-%ED%99%98%EA%B2%BD-%EB%B6%84%EB%A6%AC)
 
