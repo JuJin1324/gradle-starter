@@ -5,7 +5,9 @@
 > JVM 빌드 도구.
 
 ### 설치
-> macOS: `brew install gradle`
+> macOS: `brew install gradle`    
+> 
+> 버전 확인: `gradle -version`  
 
 ### 프로젝트 생성
 > 1.Gradle 프로젝트를 생성할 디렉터리로 이동.  
@@ -44,19 +46,26 @@
 
 ---
 
-### spring dependency 에서 로깅 라이브러리 제거
+## Task - test
+### 테스트 제외
+> 테스트를 제외하고 싶은 경우 ex. entity, repository 테스트 제외
 > ```groovy
-> configurations {
+> tasks.named('test') {
+>     exclude '**/entity/**'
+>     exclude '**/repository/**'
 >     ...
->     all {
->         exclude module: 'spring-boot-starter-logging'
->     }
 > }
 > ```
 
-## querydsl 
+### 테스트 하나만 지정해서 실행
+> `gradle test --tests "a.b.c.MyTestFile.mySingleTest"`
+
+---
+
+## 플러그인
+### querydsl
 > 주의: 문자열 안에서 외부 선언 변수를 사용하기 위해서는 문자열을 '' 가 아닌 ""로 사용해야한다.  
-> ex: `implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"`  
+> ex: `implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"`
 > ```groovy
 > buildscript {
 >     ext {
@@ -97,8 +106,8 @@
 > //querydsl 추가 끝
 > ```
 
-### Spring Rest Doc 
-> adoc 파일은 src/main 아래 asciidoc 디렉터리에 넣는다.  
+### Spring Rest Doc
+> adoc 파일은 src/main 아래 asciidoc 디렉터리에 넣는다.
 > ```groovy
 > plugins {
 >     ...
@@ -140,8 +149,7 @@
 > }
 > ```
 
-## Deploy
-### AWS S3
+### Deploy - AWS S3
 > ```groovy
 > import com.amazonaws.auth.profile.ProfileCredentialsProvider
 > 
@@ -185,9 +193,11 @@
 > }
 > ```
 
-## Test
-### lombok
-> Test 파일에서 lombok 을 사용하는 경우 다음 dependency 추가   
+---
+
+## Dependency
+### Lombok Test Dependency
+> Test 파일에서 lombok 을 사용하는 경우 다음 dependency 추가
 > ```groovy
 > dependencies {
 >     ...
@@ -196,44 +206,15 @@
 > }
 > ```
 
-### 테스트 제외
-> 테스트를 제외하고 싶은 경우 ex. entity, repository 테스트 제외  
-> ```groovy
-> tasks.named('test') {
->     exclude '**/entity/**'
->     exclude '**/repository/**'
->     ...
-> }
-> ```
+---
 
-### 통합 테스트 환경 추가
+## spring
+### spring dependency 에서 로깅 라이브러리 제거
 > ```groovy
-> sourceSets {
->     integrationTest {
->         java.srcDir "$projectDir/src/integrationTest/java"
->         resources.srcDir "$projectDir/src/integrationTest/resources"
->         compileClasspath += main.output + test.output
->         runtimeClasspath += main.output + test.output
+> configurations {
+>     ...
+>     all {
+>         exclude module: 'spring-boot-starter-logging'
 >     }
 > }
-> 
-> configurations {
->     integrationTestImplementation.extendsFrom implementation
->     integrationTestImplementation.extendsFrom testImplementation
->     integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
-> }
-> 
-> task integrationTest(type: Test) {
->     testClassesDirs = sourceSets.integrationTest.output.classesDirs
->     classpath = sourceSets.integrationTest.runtimeClasspath
->     useJUnitPlatform()
-> }
-> 
-> check.dependsOn integrationTest
-> test.dependsOn integrationTest
 > ```
-> 참조사이트: [[java,gradle]단위 테스트(unit test)와 통합 테스트(integration test) 환경 분리](https://velog.io/@mu1616/javagradle%EB%8B%A8%EC%9C%84-%ED%85%8C%EC%8A%A4%ED%8A%B8unit-test%EC%99%80-%ED%86%B5%ED%95%A9-%ED%85%8C%EC%8A%A4%ED%8A%B8integration-test-%ED%99%98%EA%B2%BD-%EB%B6%84%EB%A6%AC)
-
-### 테스트 하나만 지정해서 실행
-> `gradle test --tests "a.b.c.MyTestFile.mySingleTest"`
-
