@@ -5,21 +5,12 @@
  * Learn more about Gradle by exploring our samples at https://docs.gradle.org/8.0.2/samples
  */
 
-task("gradleCustomTask") {
-    doFirst { println("Do on First Execution") }
-    doLast { println("Do on Last Execution") }
+task hello {
+    ext.myProperty = 'hello property'
 }
 
-task("cleanFiles"){
+task helloPrint {
     doLast {
-        println("cleaned")
+        println hello.myProperty
     }
 }
-
-task("configureProperties"){
-    project.ext.blogName = "Kotlin World"
-    println("configure finished")
-}
-
-gradleCustomTask.dependsOn configureProperties
-gradleCustomTask.finalizedBy cleanFiles
