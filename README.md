@@ -199,6 +199,12 @@
 > }
 > ```
 
+### type: Copy
+> TODO
+
+### tasks.named
+> TODO
+
 ### 테스트 제외
 > 테스트를 제외하고 싶은 경우 ex. entity, repository 테스트 제외
 > ```groovy
@@ -287,12 +293,41 @@
 > api 를 통해서 의존하는 라이브러리를 추가하는 경우 해당 라이브러리 뿐만 아니라 해당 라이브러리가 의존하는 라이브러리까지 모두 
 > compile-time classpath 에 추가되어 빌드되게 된다.  
 
+### annotationProcessor
+> Gradle 에서는 컴파일 classpath 와 애노테이션 프로세서 classpath 를 분리하여 빌드 성능을 향상시킨다.
+> 기본적으로 포함되어 있는 애노테이션이 아니라면 `annotationProcessor` 를 통해 명시적으로 추가를 해줘야 한다.  
+> 일반적으로는 lombok 사용시에 사용한다.  
+
 ### test
-> implementation, compileOnly, runtimeOnly 의 경우 프로젝트 빌드 및 실행에 필요하며, 프로젝트 테스트에 사용되지 않는다.  
-> 테스트에서 해당 라이브러리를 사용하기 위해서는 
+> `implementation` 은 테스트를 포함한 전 범위에 걸쳐서 의존성이 적용된다.    
+> `testImplementation` 은 테스트 시에만 의존성이 적용된다.  
+> `compileOnly` 은 일반 빌드 시에만 적용되며, 테스트 시에는 적용되지 않아 테스트에도 의존성 적용시에는 testCompileOnly 를 따로 추가해야한다.  
+> `runtimeOnly` 는 일반 빌드 및 테스트를 포함한 전 범위에 걸쳐서 의존성이 적용된다.  
 
 ### 참조사이트
 > [[Spring] Gradle 파일 implementation, api, runtimeOnly, compileOnly... 등에 대해](https://bepoz-study-diary.tistory.com/372)
+> [[Gradle] build.gradle의 dependencies 블록 한 번에 정리하기. implementation, testImplementaion의 차이와 라이브러리 구성](https://kotlinworld.com/316)
+
+---
+
+## buildscript
+### ext 
+> TODO
+
+### dependencies
+> TODO
+
+---
+
+## configurations
+### compileOnly
+> TODO
+
+### all
+> TODO
+
+### extendsFrom
+> TODO
 
 ---
 
@@ -473,6 +508,11 @@
 ---
 
 ## spring
+### 기본 정보
+> group: TODO  
+> version: TODO  
+> sourceCompatibility: TODO
+
 ### spring dependency 에서 로깅 라이브러리 제거
 > ```groovy
 > configurations {
