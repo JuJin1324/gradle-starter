@@ -303,6 +303,15 @@
 > `testImplementation` 은 테스트 시에만 의존성이 적용된다.  
 > `compileOnly` 은 일반 빌드 시에만 적용되며, 테스트 시에는 적용되지 않아 테스트에도 의존성 적용시에는 testCompileOnly 를 따로 추가해야한다.  
 > `runtimeOnly` 는 일반 빌드 및 테스트를 포함한 전 범위에 걸쳐서 의존성이 적용된다.  
+> 
+> Test 파일에서 lombok 을 사용하는 경우 다음 dependency 추가
+> ```groovy
+> dependencies {
+>     ...
+>     testCompileOnly 'org.projectlombok:lombok'
+>     testAnnotationProcessor 'org.projectlombok:lombok' 
+> }
+> ```
 
 ### 참조사이트
 > [[Spring] Gradle 파일 implementation, api, runtimeOnly, compileOnly... 등에 대해](https://bepoz-study-diary.tistory.com/372)
@@ -492,28 +501,12 @@
 > }
 > ```
 
----
-
-## Dependency
-### Lombok Test Dependency
-> Test 파일에서 lombok 을 사용하는 경우 다음 dependency 추가
-> ```groovy
-> dependencies {
->     ...
->     testCompileOnly 'org.projectlombok:lombok'
->     testAnnotationProcessor 'org.projectlombok:lombok' 
-> }
-> ```
-
----
-
-## spring
-### 기본 정보
+### SpringBoot plugin
 > group: TODO  
 > version: TODO  
 > sourceCompatibility: TODO
-
-### spring dependency 에서 로깅 라이브러리 제거
+> 
+> spring dependency 에서 로깅 라이브러리 제거  
 > ```groovy
 > configurations {
 >     ...
