@@ -4,7 +4,7 @@
 ### 용어 정리
 > 컴파일(compile): 소스 코드를 바이너리 파일로 변환하는 과정(예: .java -> .class 파일로 변경)  
 > 
-> 빌드(build): 프로젝트의 소스, 리소스 파일들을 컴퓨터에서 실행할 수 있는 독립적인 형태로 변환하는 과정과 그 결과  
+> 빌드(build): 프로젝트의 소스, 리소스 파일들을 컴퓨터에서 실행할 수 있는 독립적인 형태로 변환하는 과정과 그 결과.  
 > 빌드 과정에서 소스 코드에 대한 컴파일이 진행됨으로 컴파일은 빌드 과정 중 하나이다.  
 > 
 > 빌드 툴(build tool): 빌드에서는 컴파일, 테스트, 배포 등 과정이 포함될 수 있고, 빌드 과정을 도와주는 도구를 빌드 툴이라 합니다.    
@@ -51,7 +51,7 @@
 > Gradle 프로그램 파일로 해당 프로젝트를 clone 한 PC 에 Gradle 이 설치되어 있지 않더라도 프로젝트를 Gradle 로 빌드시킬 수 있게 하기 위해서
 > 프로젝트 내에 존재하는 Gradle 프로그램 파일로 보면됨.  
 > PC 에 Gradle 이 설치되어 있는 경우 다음과 같이 테스크를 실행하면 된다: `gradle build`  
-> PC 에 Gradle 이 설치되어 있지 않은 경우 다음과 같이 테스크를 실행한다: `gradlew build`  
+> PC 에 Gradle 이 설치되어 있지 않은 경우 다음과 같이 테스크를 실행한다: `./gradlew build`  
 > 
 > settings.gradle  
 > 프로젝트에 대한 설정 정보를 작성한 파일.  
@@ -147,28 +147,6 @@
 > }
 > ```
 
-### 다른 task 호출
-> ```groovy
-> task <태스크 명> {
->   tasks.<다른 테스크 명>
-> }
-> 
-> task <다른 테스크 명> {
->   // 내용
-> }
-> ```
-> 예시
-> ```groovy
-> task hello {
->   println 'Hello gradle'
->   tasks.otherTask
-> }
-> 
-> task otherTask {
->   println 'do other task'
-> }
-> ```
-
 ### task chaining
 > dependsOn 은 특정 Task 실행 이전에 수행되도록 만들고, finalizedBy 는 특정 Task 실행 이후 수행되도록 만드는 Task 객체의 프로퍼티이다.  
 > 단 해당 Task 의 doFirst 혹은 doLast 블록에 있는 내용이 dependsOn 및 finalizedBy 에 맞게 실행된다.  
@@ -181,7 +159,7 @@
 >   // 내용
 > }
 > 
-> > task <다른 태스크 명1> {
+> task <다른 태스크 명1> {
 >   // 내용
 > }
 > 
@@ -329,9 +307,6 @@
 ---
 
 ## configurations
-### compileOnly
-> TODO
-
 ### all
 > TODO
 
