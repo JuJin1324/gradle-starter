@@ -196,6 +196,11 @@
 ### 테스트 하나만 지정해서 실행
 > `gradle test --tests "a.b.c.MyTestFile.mySingleTest"`
 
+### 포함된 테스크 제외하며 실행
+> `gradle bootJar` 의 경우 test 태스크 및 compileJava 태스트 등의 테스크가 실행된다.    
+> gradle bootJar 태스크에서 test 태스크와 compileJava 태스크를 제외하여 실행하고 싶으면 뒤에 `-x <task 명>`를 붙인다.    
+> 예시: `gradle bootJar -x test -x compileJava`  
+
 ### 참조사이트
 > [Gradle task의 초간단 이해](https://sharplee7.tistory.com/7)
 
