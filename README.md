@@ -499,5 +499,106 @@
 ---
 
 ## Deploy
-### TODO
-> TODO
+### 개요
+> Gradle + AWS CodeBuild 를 통하여 스프링부트 프로젝트를 배포하는 과정을 정리하였다.   
+> build.gradle 파일에 아래의 추가 작업을 통해서 executable-jar 파일 외에 실행 스크립트 및 외부 application-XXX.yml 을 생성하여 S3 bucket 에 전송한다.     
+
+### buildspec.yml
+> AWS CodeBuild 에서 프로젝트 빌드를 위해서 프로젝트에 루트에 `buildspec.yml` 을 위치시킨다.  
+> 
+> `build`: 프로젝트 빌드에 관한 정보를 담는다.  
+> `build.on-failure`: 빌드 중 오류가 발생하여 빌드가 실패한 경우 해야할 작업을 기술한다.(ABORT, CONTINUE 중 택 1)  
+> `build.commands`: 빌드 작업 시 실행할 명령어들의 목록  
+> 
+> `post_build`: 빌드가 성공적으로 완료되면 이후 실행할 프로세스에 대한 정보를 담는다.    
+> `post_build.on-failure`: 포스트 빌드 중 오류가 발생하여 포스트 빌드가 실패한 경우 해야할 작업을 기술한다.(ABORT, CONTINUE 중 택 1)  
+> `post_build.commands`: 포스트 빌드 작업 시 실행할 명령어들의 목록  
+> 
+> `artifacts`: 빌드 산출물(artifact)에 대한 정보  
+> `files`: S3 에 올릴 파일 목록  
+> `discard-paths`: 산출물이 존재하는 경로를 버리고 파일 자체들만 S3 에 위치시킬 경우 yes, 디렉터리 경로를 유지해서 S3 에 넣을 경우 no  
+> 
+> ```yaml
+> version: 0.2
+> phases:
+>   build:
+>       on-failure: ABORT
+>       commands:
+>           - echo Build Starting on `date`
+>           - java -version
+>           - chmod +x ./gradlew
+>           - ./gradlew bootJar -Pprofile=dev -x test -x asciidoctor
+>   post_build:
+>       on-failure: ABORT
+>       commands:
+>           - echo $(basename ./build/libs/*.jar)
+>           - echo $(basename ./build/scripts/*.sh)
+>           - echo $(basename ./build/resources/main/*.yml)
+>           - pwd
+> artifacts:
+>   files:
+>       - build/libs/*.jar
+>       - build/scripts/*.sh
+>       - build/resources/main/application-dev.yml
+>   discard-paths: yes
+> ```
+
+### build.gradle
+> `afterEvaluate` task: 빌드가 완료된 후에 실행하는 태스크, 이 태스크를 통해서 배포 스크립트를 생성한다.
+> `-Dspring.config.import=application-dev.yml`: 스프링 프로젝트가 application.yml 을 사용하면서 application-dev.yml 을 같이 사용하려할 때
+> import 옵션을 사용한다.  
+> 
+> ```groovy
+> buildscript {
+>     ext {
+>         ...
+>         profile = (!project.hasProperty('profile') || !profile) ? 'local' : profile
+>         deployPath = profile.equals("dev") ?
+>                 "/home/starter/${rootProject.name}" : "/home/ec2-user/centum/${rootProject.name}"
+>     }
+> } 
+> ...
+> afterEvaluate {
+>   mkdir "${buildDir}/scripts"
+>   def script = "${buildDir}/scripts/start-${rootProject.name}.sh"
+>   
+>       if (profile.equals("dev")) {
+>           file(script).text = """#!/bin/bash
+>               # pid 파일이 존재하면서 pid 파일의 내용이 있는 경우
+>               if [ -f "${rootProject.name}.pid" ] && [ ! -z `cat ${rootProject.name}.pid` ]; 
+>               then 
+>                   kill `cat ${rootProject.name}.pid`
+>                   touch ${rootProject.name}.pid
+>               fi 
+>               
+>               /bin/java -jar -Dspring.config.import=application-dev.yml -Dspring.profiles.active=${profile} ${bootJar.archiveFileName.get()} & 
+>           """
+>       } else {
+>           file(script).text = """#!/bin/bash
+>               # pid 파일이 존재하면서 pid 파일의 내용이 있는 경우
+>               if [ -f "${rootProject.name}.pid" ] && [ ! -z `cat ${rootProject.name}.pid` ]; 
+>               then 
+>                   kill `cat ${rootProject.name}.pid`
+>                   touch ${rootProject.name}.pid
+>               fi 
+>               
+>               sudo chmod +x ${deployPath}/${bootJar.archiveFileName.get()}
+>               sudo ln -sf ${deployPath}/${bootJar.archiveFileName.get()} /etc/init.d/${rootProject.name}
+>               sudo service ${rootProject.name} start
+>           """
+>       }
+>       file(script).setExecutable(true)
+>   
+>       if (profile.equals("prod") || profile.equals("stage")) {
+>           mkdir "${buildDir}/conf"
+>           def conf = "${buildDir}/conf/${rootProject.name}.conf"
+>           file(conf).text = "JAVA_OPTS='-Dspring.profiles.active=${profile}'\n"
+>               + "PID_FOLDER='${deployPath}\n"
+>       }
+> }
+> ```
+
+### 참조사이트
+> [Spring Boot 2.0, 리눅스에서 제어 가능한 서비스로 빌드하기](https://jsonobject.tistory.com/453)  
+> [[Gradle] Profile 구성하기](https://velog.io/@iniestar/gradle-profile)  
+> [에 대한 빌드 사양 참조 CodeBuild](https://docs.aws.amazon.com/ko_kr/codebuild/latest/userguide/build-spec-ref.html)  
