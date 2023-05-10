@@ -320,6 +320,56 @@
 
 ---
 
+## 서비스로 실행 가능한 Jar 파일 생성
+### build.gradle
+> ```groovy
+> ...
+> plugins {
+>     id 'org.springframework.boot' version '2.6.3'
+>     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+>     ...
+> }
+> ...
+> springBoot {
+>     executable = true
+> }
+> ...
+> ```
+
+### 서비스 스크립트 등록
+> 배포 서버에서 실행할 스크립트 예제이다.
+> ```shell
+> # 빌드된 프로젝트를 서비스로 등록
+> sudo ln -s /home/some-project/some-project.jar /etc/init.d/some-project
+> 
+> # 등록한 서비스에 실행 권한 부여
+> sudo chmod 0755 /etc/init.d/some-project
+> 
+> # 서비스 실행시 적용될 JVM 옵션 설정
+> vi /home/some-project/some-project.conf
+> PID_FOLDER='/home/some-project'
+> LOG_FOLDER='/dev'
+> LOG_FILENAME='null'
+> JAVA_OPTS='-server -Xms8g -Xmx8g -XX:MaxMetaspaceSize=512m -Dspring.profiles.active=prod'
+> :wq
+> ```
+> /etc/init.d/ 경로에 빌드된 프로젝트의 .jar 파일의 심볼릭 링크를 생성하고 파일 실행 권한을 부여하는 것 만으로 운영체제 내의 정식 서비스로 작동하게 된다. 
+> 이 작업은 최초 1번만 필요하며, 추후 빌드된 파일의 경로와 이름이 변경되지 않는한 자동으로 적용된다.
+> 
+> 추가적으로 빌드된 프로젝트의 .jar 파일과 동일한 디렉토리에 동일한 파일 이름으로 .conf 파일을 작성하면 서비스 실행시 적용될 다양한 옵션을 자동으로 적용할 수 있다.
+> 
+> .conf 파일에서 LOG_FOLDER와 LOG_FILENAME 옵션을 사용하면 기본적으로 콘솔에 출력되는 로그를 실시간으로 파일에 남길 수 있다. 
+> 하지만 Spring Boot에 기본 내장된 Logback을 이용한 파일 로깅(logback.xml에 로그 처리 정책을 정의하는 방법)이 훨씬 강력하고 다양한 기능을 제공하기 때문에
+> 위와 같이 /dev/null을 지정하여 서비스 레벨에서의 로그 기능을 비활성화하는 방법을 추천한다.
+>
+> 다시 정리하면, 최종적으로 빌드된 some-project.jar, 이와 파일 이름이 동일한 some-project.conf 2개 파일이 존재해야 하고, 
+> 해당 some-project.jar에 대한 심볼릭 링크를 /etc/init.d/some-project로 생성하면 해당 애플리케이션의 서비스로서의 실행 준비가 완료되는 것이다.
+
+### 참조사이트
+> [Spring Boot 2.0, 리눅스에서 제어 가능한 서비스로 빌드하기](https://jsonobject.tistory.com/453)
+
+---
+
 ## Plugins
 ### Java plugin
 > build.gradle 에 플러그인 추가
