@@ -544,7 +544,7 @@
 > ```
 
 ### build.gradle
-> `afterEvaluate` task: 빌드가 완료된 후에 실행하는 태스크, 이 태스크를 통해서 배포 스크립트를 생성한다.
+> `afterEvaluate`: 빌드가 완료된 후에 실행하는 태스크, 이 태스크를 통해서 배포 스크립트를 생성한다.
 > `-Dspring.config.import=application-dev.yml`: 스프링 프로젝트가 application.yml 을 사용하면서 application-dev.yml 을 같이 사용하려할 때
 > import 옵션을 사용한다.  
 > 
@@ -554,7 +554,7 @@
 >         ...
 >         profile = (!project.hasProperty('profile') || !profile) ? 'local' : profile
 >         deployPath = profile.equals("dev") ?
->                 "/home/starter/${rootProject.name}" : "/home/ec2-user/centum/${rootProject.name}"
+>                 "/home/starter/${rootProject.name}" : "/home/ec2-user/starter/${rootProject.name}"
 >     }
 > } 
 > ...
@@ -592,8 +592,7 @@
 >       if (profile.equals("prod") || profile.equals("stage")) {
 >           mkdir "${buildDir}/conf"
 >           def conf = "${buildDir}/conf/${rootProject.name}.conf"
->           file(conf).text = "JAVA_OPTS='-Dspring.profiles.active=${profile}'\n"
->               + "PID_FOLDER='${deployPath}\n"
+>           file(conf).text = "JAVA_OPTS='-Dspring.profiles.active=${profile}'\nPID_FOLDER='${deployPath}'\n"
 >       }
 > }
 > ```
