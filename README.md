@@ -638,25 +638,9 @@
 >   def script = "${buildDir}/scripts/start-${rootProject.name}.sh"
 >   
 >       if (profile.equals("dev")) {
->           file(script).text = """#!/bin/bash
->               # pid 파일이 존재하면서 pid 파일의 내용이 있는 경우
->               if [ -f "${rootProject.name}.pid" ] && [ ! -z `cat ${rootProject.name}.pid` ]; 
->               then 
->                   kill `cat ${rootProject.name}.pid`
->                   touch ${rootProject.name}.pid
->               fi 
->               
->               /bin/java -jar -Dspring.config.import=application-dev.yml -Dspring.profiles.active=${profile} ${bootJar.archiveFileName.get()} & 
->           """
+>           file(script).text = "/bin/java -jar -Dspring.config.import=application-dev.yml -Dspring.profiles.active=${profile} ${bootJar.archiveFileName.get()} &"
 >       } else {
 >           file(script).text = """#!/bin/bash
->               # pid 파일이 존재하면서 pid 파일의 내용이 있는 경우
->               if [ -f "${rootProject.name}.pid" ] && [ ! -z `cat ${rootProject.name}.pid` ]; 
->               then 
->                   kill `cat ${rootProject.name}.pid`
->                   touch ${rootProject.name}.pid
->               fi 
->               
 >               sudo chmod +x ${deployPath}/${bootJar.archiveFileName.get()}
 >               sudo ln -sf ${deployPath}/${bootJar.archiveFileName.get()} /etc/init.d/${rootProject.name}
 >               sudo service ${rootProject.name} start
@@ -664,7 +648,7 @@
 >       }
 >       file(script).setExecutable(true)
 >   
->       if (profile.equals("prod") || profile.equals("stage")) {
+>       if (profile.equals("prod") || profile.equals("staging")) {
 >           mkdir "${buildDir}/conf"
 >           def conf = "${buildDir}/conf/${rootProject.name}.conf"
 >           file(conf).text = "JAVA_OPTS='-Dspring.profiles.active=${profile}'\nPID_FOLDER='${deployPath}'\n"
