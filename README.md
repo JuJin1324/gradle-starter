@@ -183,6 +183,67 @@
 > **비교**  
 > 자바의 equals 와 동일하게 그루비는 == 를 이용하여 문자열 등을 비교하게 된다. 그러나 객체가 같은지 비교하려면 is() 를 사용하여 비교해야 한다.  
 
+### 그레이들의 스크립트 파일 구조
+> 그레이들의 스크립트 파일은 두 가지 요소로 구성되는데, `처리문(Statement)` 영역과 `스크립트 블록(script block)` 영역이다.  
+> 처리문은 일반적인 프로그래밍에서의 지역 변수, 속성 정의 및 설정, 메서드 등이고, 스크립트 블록은 특정한 그레이들의 프로젝트를 빌드하기 위한 부분으로
+> 그레이들에서 사용되는 개념이다.    
+> 그레이들의 주요 스크립트 불록은 다음과 같다.  
+> * repositories: 저장소 설정
+> * dependencies: 의존 관계 설정
+> * buildscript: 빌드 스크립트 클래스 패스 설정
+> * initscript: 초기화 스크립트 설정
+> * configurations: 환경 구성 설정
+> * allprojects: 서브 프로젝트 포함 전체 프로젝트 설정
+> * subprojects: 서브 프로젝트 설정
+> * artifacts: 빌드 결과에 대한 설정
+
+### 변수
+> **지역 변수**  
+> 선언된 부분에서 영향력 있는 변수  
+> 
+> **시스템 속성**  
+> 시스템 관련 정보를 저장하는 변수.  
+> 명령어 인수로 사용하려면 -D 옵션이나 --system-prop 옵션을 사용하여 그 뒤에 속성명과 속성값을 설정하면 된다.  
+> build.gradle
+> ```groovy
+> task hello {
+>   println System.properties['message']
+> }
+> ```
+> 
+> shell
+> ```shell
+> gradle -Dmessage=hello hello
+> ```
+> 
+> **확장 속성**  
+> ext 라는 예약어를 사용하여 스크립트 파일에서 도메인 객체의 속성을 추가할 때 사용한다.  
+> ```groovy
+> // 확장 속성 지정
+> ext {
+>   extPro1 = 'pro1'
+>   extPro2 = 'pro2'
+> }
+> 
+> // 사용
+> println '속성값 1 : ' + ext.extPro1
+> println '속성값 2 : ' + ext.extPro2
+> ```
+> 
+> **프로젝트 속성**  
+> 속성 파일인 gradle.properties 에 '속성명=속성값' 형식으로 정의하게 되면 프로젝트 속성의 변수가 선언되어 속성을 추가할 수 있다.  
+> gradle.properties
+> ```properties
+> msg=Hi, Gradle!
+> ```
+> build.gradle
+> ```groovy
+> task hello {
+>   println msg
+> }
+> ```
+> 다만 gradle.properties 와 build.gradle 파일이 동일한 경로에 있어야한다.
+
 ---
 
 ## Task
