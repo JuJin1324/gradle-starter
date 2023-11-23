@@ -5,28 +5,38 @@
  * Learn more about Gradle by exploring our samples at https://docs.gradle.org/8.0.2/samples
  */
 
-task exeTask1 {
+defaultTasks = ['exeTask002', 'exeTask001']
+
+gradle.allprojects {
+    project ->
+        project.beforeEvaluate {
+            println project.name + ': check start'
+        }
+        project.afterEvaluate {
+            println project.name + ': check end'
+        }
+}
+
+project.description = 'Project Object Description'
+project.version = 'exeTask v1.0'
+
+task exeTask001 {
     doLast {
-        throw new Exception()
+        println 'Project name: ' + project.name
+        println 'Project description: ' + project.description
+        println 'Project group: ' + project.group
+        println 'Project path: ' + project.path
+        println 'Project projectDir: ' + project.projectDir
+        println 'Project status: ' + project.status
+        println 'Project state: ' + project.state.toString()
+        println 'Project version: ' + project.version
     }
 }
 
-task exeTask2(dependsOn: 'exeTask1') {
+task exeTask002 {
     doLast {
-        println 'exeTask 2'
+        throw new StopExecutionException()
+//        throw new StopActionException()
+        println project.description
     }
 }
-
-task exeTask3(dependsOn: 'exeTask2') {
-    doLast {
-        println 'exeTask 3'
-    }
-}
-
-task finishTask {
-    doLast {
-        println 'finish task~~~~~'
-    }
-}
-
-exeTask1.finalizedBy finishTask

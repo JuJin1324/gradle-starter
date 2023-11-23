@@ -368,12 +368,6 @@
 > ./gradlew exeTask3
 > ```
 
-### type: Copy
-> TODO
-
-### tasks.named
-> TODO
-
 ### 테스트 제외
 > 테스트를 제외하고 싶은 경우 ex. entity, repository 테스트 제외
 > ```groovy
@@ -491,25 +485,7 @@
 > [[Spring] Gradle 파일 implementation, api, runtimeOnly, compileOnly... 등에 대해](https://bepoz-study-diary.tistory.com/372)
 > [[Gradle] build.gradle의 dependencies 블록 한 번에 정리하기. implementation, testImplementaion의 차이와 라이브러리 구성](https://kotlinworld.com/316)
 
----
-
-## buildscript
-### ext 
-> TODO
-
-### dependencies
-> TODO
-
----
-
-## configurations
-### all
-> TODO
-
-### extendsFrom
-> TODO
-
----
+--- 
 
 ## 서비스로 실행 가능한 Jar 파일 생성
 ### build.gradle
@@ -826,3 +802,48 @@
 > [Spring Boot 2.0, 리눅스에서 제어 가능한 서비스로 빌드하기](https://jsonobject.tistory.com/453)  
 > [[Gradle] Profile 구성하기](https://velog.io/@iniestar/gradle-profile)  
 > [에 대한 빌드 사양 참조 CodeBuild](https://docs.aws.amazon.com/ko_kr/codebuild/latest/userguide/build-spec-ref.html)  
+
+---
+
+## 그레이들의 도메인 객체
+### Project 객체
+> Project 객체의 속성.
+> * version
+> * description
+> * name
+> * state: 프로젝트 빌드 상태(NOT EXECUTED, EXECUTING, EXECUTED, FAILED)
+> * status: 프로젝트 결과물의 상태(NOT EXECUTED, EXECUTING, EXECUTED, FAILED)
+> * path: 프로젝트 경로
+> * projectDir: 프로젝트 기준 디렉터리
+> * group
+> * buildDir: 모든 결과물이 생성되는 디렉터리, 기본값: projectDir/build
+> * plugins
+> * project: 기준 프로젝트 참조
+> * rootProject: 루트 프로젝트 참조
+> * parent: 기준 프로젝트의 상위 프로젝트 참조
+> * childProject
+> * allprojects
+> * subproject
+> 
+> Project 객체의 API.
+> * project(path): 지정된 경로의 프로젝트에 대하여 설정
+> * project(path, configureClosure): 지정된 경로의 프로젝트에 대하여 클로저를 사용하여 설정
+> * absoluteProjectPath(path): 절대 경로를 변환하여 프로젝트 확인
+> * apply(closure): 플러그인이나 스크립트를 적용
+> * configure(object, configureClosure): 클로저를 통하여 설정된 상태를 이용하여 객체를 구성
+> * subprojects(action): 해당 프로젝트의 하위 프로젝트 설정
+> * task(name): 주어진 이름으로 태스크를 생성하고 프로젝트에 추가
+> * afterEvaluate(action): 프로젝트가 평가된 직후 추가
+> * beforeEvaluate(action): 프로젝트가 평가되기 바로 직전 추가
+
+### Task 객체
+> Task 객체가 실행될 때 예외가 발생하더라도 빌드의 성공 여부를 실패로 만들지 않고 계속 다음 단계로 진행하게 예외 처리를 할 수 있도록 한다.  
+> StopActionException 은 지금 실행되고 있는 태스크를 중단하고 예외를 throw 처리하여 다음에 예정된 태스크를 계속할 수 있도록 해주며,
+> StopExecutionException 은 태스크 실행을 중단하고 다음 태스크로 계속 진행할 수 있도록 하여 빌드를 끝까지 수행할 수 있도록 할 수 있다.  
+
+### Settings 객체
+> 설정 스크립트를 참조할 수 있게 위임받는 객체로, 주로 멀티 프로젝트를 정의하기 위한 용도로 많이 사용한다.  
+> 
+> **Settings 객체와 멀티 프로젝트**  
+> `include()` 는 루트 프로젝트를 기준으로 계층형 멀티 프로젝트를 구성할 때 사용한다.  
+> `includeFlat()` 은 루트 프로젝트와 동일한 레벨의 디렉터리로 프로젝트(딘층형 멀티 프로젝트)를 구성할 때 사용한다.
