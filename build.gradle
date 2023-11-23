@@ -5,12 +5,28 @@
  * Learn more about Gradle by exploring our samples at https://docs.gradle.org/8.0.2/samples
  */
 
-task hello {
-    ext.myProperty = 'hello property'
-}
-
-task helloPrint {
+task exeTask1 {
     doLast {
-        println hello.myProperty
+        throw new Exception()
     }
 }
+
+task exeTask2(dependsOn: 'exeTask1') {
+    doLast {
+        println 'exeTask 2'
+    }
+}
+
+task exeTask3(dependsOn: 'exeTask2') {
+    doLast {
+        println 'exeTask 3'
+    }
+}
+
+task finishTask {
+    doLast {
+        println 'finish task~~~~~'
+    }
+}
+
+exeTask1.finalizedBy finishTask

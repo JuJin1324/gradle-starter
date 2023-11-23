@@ -332,33 +332,40 @@
 > ```
 
 ### task chaining
-> dependsOn 은 특정 Task 실행 이전에 수행되도록 만들고, finalizedBy 는 특정 Task 실행 이후 수행되도록 만드는 Task 객체의 프로퍼티이다.  
+> dependsOn 은 태스크 간에 의존 관계를 지정하는 역할을 한다.   
+> finalizedBy 는 종료 태스크를 지정하는데 종료 태스크는 자바의 finally 와 유사한 성격을 가지고 있다. 
+> 종료 태스크는 지정된 태스크에서 에러나 예외가 발생하더라도 실행된다. 
 > 단 해당 Task 의 doFirst 혹은 doLast 블록에 있는 내용이 dependsOn 및 finalizedBy 에 맞게 실행된다.  
 > ```groovy
-> task <태스크 명> {
->   // 내용
+> task exeTask1 {
+>     doLast {
+>         throw new Exception()
+>     }
 > }
 > 
-> task <다른 태스크 명1> {
->   // 내용
+> task exeTask2(dependsOn: 'exeTask1') {
+>     doLast {
+>         println 'exeTask 2'
+>     }
 > }
 > 
-> task <다른 태스크 명1> {
->   // 내용
+> task exeTask3(dependsOn: 'exeTask2') {
+>     doLast {
+>         println 'exeTask 3'
+>     }
 > }
 > 
-> <태스크 명>.dependsOn <다른 태스크 명1>
-> <태스크 명>.finalizedBy <다른 태스크 명2>
+> task finishTask {
+>     doLast {
+>         println 'finish task~~~~~'
+>     }
+> }
+> 
+> exeTask1.finalizedBy finishTask
 > ```
-> 예시
-> ```groovy
-> task hello(dependsOn: 'otherTask') {
->   println 'Hello gradle'
-> }
-> 
-> task otherTask {
->   println 'Other task'
-> }
+> 실행
+> ```shell
+> ./gradlew exeTask3
 > ```
 
 ### type: Copy
