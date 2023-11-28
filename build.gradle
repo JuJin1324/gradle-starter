@@ -20,23 +20,16 @@ gradle.allprojects {
 project.description = 'Project Object Description'
 project.version = 'exeTask v1.0'
 
-task exeTask001 {
-    doLast {
-        println 'Project name: ' + project.name
-        println 'Project description: ' + project.description
-        println 'Project group: ' + project.group
-        println 'Project path: ' + project.path
-        println 'Project projectDir: ' + project.projectDir
-        println 'Project status: ' + project.status
-        println 'Project state: ' + project.state.toString()
-        println 'Project version: ' + project.version
+task copyTask(type: Copy) {
+    mkdir 'dest'
+    from('scripts') {
+        include '**/*.txt'
+        rename 'text1.txt', 'text2.txt'
     }
-}
+    into 'dest'
 
-task exeTask002 {
-    doLast {
-        throw new StopExecutionException()
-//        throw new StopActionException()
-        println project.description
+    // filter 를 이용한 파일 내용 변경
+    filter { line ->
+        line.replaceAll 'text1', 'text2'
     }
 }

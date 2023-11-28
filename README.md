@@ -847,3 +847,99 @@
 > **Settings 객체와 멀티 프로젝트**  
 > `include()` 는 루트 프로젝트를 기준으로 계층형 멀티 프로젝트를 구성할 때 사용한다.  
 > `includeFlat()` 은 루트 프로젝트와 동일한 레벨의 디렉터리로 프로젝트(딘층형 멀티 프로젝트)를 구성할 때 사용한다.
+
+---
+
+## 그레이들의 파일 처리
+### 파일 검증
+> ```groovy
+> File checkFile = file('/index.html', PathValidation.FILE)
+> File checkDirectory = file('src', PathValidation.DIRECTORY)
+> ```
+> 
+> * PathValidation.DIRECTORY: 디렉터리 유무 확인 
+> * PathValidation.FILE: 파일 유무 확인
+> * PathValidation.EXISTS: 파일 또는 디렉터리 유무 확인
+> * PathValidation.NONE: 파일 검증 안함
+
+### FileCollection
+> ```groovy
+> // 파일 컬렉션 생성
+> FileCollection fileCollection = files('settings.txt', 'login.txt', new File('infro.java'), new File('index.html'))
+> 
+> // 텍스트 파일에 대하여 필터링
+> FileCollection txtFilter = fileCollection.filter{collectionFile -> collectionFile.name.endsWith '.txt'}
+> ```
+
+### Copy 태스크
+> 그레이들은 파일을 복사하기 위해 copy 라는 태스크를 제공한다.  
+> ```groovy
+> copy {
+>     from ('scripts/text1.txt')    // 대상 파일의 경로
+>     into file('scripts/text2')    // 목적지 경로(마지막에 디렉터리가 와야함)
+> }
+> ```
+>
+> include/exclude 를 통한 복사할 파일 포함 및 제외
+> ```groovy
+> copy {
+>     from ('src')    // 대상 파일의 경로
+>     into file('src-copy')    // 목적지 경로(마지막에 디렉터리가 와야함)
+>     
+>     // 파일 포함 및 제외
+>     include '**/*.java'
+>     exclude '**/*Dao.java'
+>       
+>     // 디렉터리 포함 및 제외
+>     includeEmptyDirs = true
+>     includeEmptyDirs = false
+> }
+> ``` 
+>
+> rename: 파일명 변경
+> ```groovy
+> rename '(.*)Test.java', 'changeName.java'
+> ```
+> 
+> from 클로저와 rename 을 이용한 파일 이름 변경
+> ```groovy
+> copy {
+>     from('src/com/org/file') {
+>         rename 'original.java', 'usingCloser.java'
+>     }
+>     into 'src/com/des/file'
+> }
+> ```
+
+### 태스크를 이용한 파일 복사
+> ```groovy
+> // type 에 copy 를 지정해야 한다.
+> task copyTask(type: Copy) {
+>     // 디렉터리 생성
+>     mkdir 'dest'
+> 
+>     from('scripts') {
+>         include '**/*.txt'
+>         rename 'text1.txt', 'text2.txt'
+>     }
+>     into 'dest'
+>      
+>     // filter 를 이용한 파일 내용 변경
+>     filter { line ->
+>         line.replaceAll 'text1', 'text2' 
+>     } 
+> }
+> ```
+
+### 파일 삭제
+> ```groovy
+> task delFile(type: Delete) {
+>     delete 'src/com/org/original.java', 'src/com/org/originalDao.java'
+>     // 심볼릭 링크 사용 여부 설정
+>     followSymlinks = true
+> }
+> ```
+> followSymlinks 는 파일을 삭제할 때 심볼릭 링크를 따라야 하는지 여부를 지정하는 것으로 true 일 경우
+> 심볼릭 링크에 의하여 파일 삭제가 이루어진다고 보면 된다.
+
+--- 
