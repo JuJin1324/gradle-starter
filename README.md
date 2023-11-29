@@ -943,3 +943,140 @@
 > 심볼릭 링크에 의하여 파일 삭제가 이루어진다고 보면 된다.
 
 --- 
+
+## 의존 관계
+### 환경 구성
+> 그레이들에서 환경 구성을 정의하려면 `configurations` 블록을 사용하면 된다. 메이븐의 scope 와 유사하다.  
+> ```groovy
+> configurations {
+>     conf1
+> }
+> ```
+
+### 의존 관계 지정 방법
+> **외부 모듈 의존 관계 정의**  
+> 의존 관계를 정의할 때 많이 사용하는 방법 중 하나가 외부 모듈 의존 관계 지정을 통해 정의하는 것이다.  
+> * 외부 모듈 의존 관계 지정: 인터넷 저장소에 대하여 의존 관계 지정  
+> 
+> ```groovy
+> // 저장소 정의
+> repositories {
+>     mavenCentral()
+> }
+> 
+> // 의존 관계 지정
+> dependencies {
+>     conf1 'ch.qos.logback:logback-classic:1.0.13'
+> }
+> ```
+> 
+> **파일 의존 관계 정의**  
+> 파일 의존 관계를 지정하려면 files() 나 fileTree() 를 사용한다.  
+> 특정 파일이나 라이브러리를 지정할 때는 files() 를 이용하여 지정한다.  
+> 디렉터리에 대하여 해당 디렉터리에 있는 모든 내용을 의존 관계로 정의하기를 원한다면 fileTree() 를 사용한다.  
+> 
+> ```groovy
+> configurations {
+>     conf1
+> }
+> 
+> dependencies {
+>     // 1. 파일 의존 관계 - 특정 파일이나 라이브러리 지정
+>     conf1 files("lib/commonLib.jar")
+>     
+>     // 2. 파일 의존 관계 - 디렉터리 지정
+>     conf1 fileTree(dir:"lib", include:"**/*.jar")
+> }
+> ```
+> 
+> **프로젝트 의존 관계 정의**  
+> project() 를 이용해 다른 프로젝트를 참조한다. 인수로 참조하고자 하는 프로젝트 경로를 지정한다.
+> 프로젝트 경로는 루트 프로젝트를 기준으로 하게 된다. 
+> ```groovy
+> dependencies {
+>     compile project(':subProject')
+> }
+> ```
+
+### 변경성 모듈 정의
+> dependencies 블록에서 의존 관계를 정의할 때 시간이 경과하면서 정의된 모듈 또는 라이브러리의 버전은 새롭게 출시되어
+> 변경된다. 이럴 때 참조하고자 지정한 의존 관계의 모듈의 버전을 동적으로 관리하는 방법을 살펴본다.  
+> 
+> ```groovy
+> configurations {
+>     confDef
+> }
+> 
+> // 변경성 모듈에 대한 캐시 간격 지정
+> configurations.confDef.resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
+> configurations.confDef.resolutionStrategy.cacheChangingModulesFor 10, 'hours'
+> 
+> // 저장소 정의
+> repositories {
+>     mavenCentral()
+>     maven {
+>         url "https://repository.apache.org/content/groups/snapshots"
+>     }
+> }
+> 
+> // 의존 관계 정의
+> dependencies {
+>     // 1.x 버전 중 최신 버전에 대한 지정
+>     confDef 'org.slf4j:slf4j-api:1.+'
+>     // 출시 버전 중 최신 버전에 대한 지정
+>     confDef 'commons-cli:commons-cli:latest.integration'
+>     // 배포된 버전 중 최신 버전에 대한 지정
+>     confDef 'junit:junit:latest.release'
+> }
+> ```
+> * `1.+`: 1.x 버전 중 최신 버전에 대한 지정이다.  
+> * `latest.integration`: 출시 버전의 안정도 유무에 상관없이 모든 출시 버전 중에서 최신 버전을 참조하도록 지정한다.  
+> * `latest.release`: 출시 버전 중에서도 안정성이 검증된 버전 중에서 최신 버전을 참조하도록 지정한다.
+> 
+> 해당 프로젝트가 사용하는 라이브러리를 확인하는 태스크는 다음과 같다.
+> ```shell
+> ./gradlew dependencies
+> ```
+> 
+> 다양한 라이브러리를 사용하다 보면 의존 관계에서 사용하고자 하는 라이브러리 또는 해당 라이브러리가 의존 관계에 의해 전이적으로 버전만 다르게
+> 최적화되어 참조되어 사용되고 있다면 프로젝트는 라이브러리 A 와 라이브러리 B 중에서 어떤 라이브러리의 버전을 사용해야할지 판단의 문제가 발생한다.  
+> 
+> * 라이브러리 A: Lib-2.3.1.jar
+> * 라이브러리 B: Lib-2.0.5.jar
+> 
+> 그레이들에서는 이럴 때 기본적으로 가장 최신 버전의 의존 관계를 사용하도록 지정되어 있다. 
+> 또한 환경 구성 정의를 통해서 버전 충돌이 일어난 경우 빌드가 실패하도록 할 수도 있다.  
+> ```groovy
+> configurations {
+>     conf1
+>     testConf1.extendsFrom conf1
+> }
+> 
+> // Fail 정책 사용
+> configurations.testConf1 {
+>     resolutionStrategy {
+>         failOnVersionConflict()
+>           
+>         // Fail 정책 사용 시 특정 버전을 강제할 수도 있다.
+>         force 'org.codehaus.Groovy:Groovy-all:2.3.1'
+>     }
+> }
+> ```
+> 
+> 버전 충돌을 피하기 위해 exclude() 사용하여 문제가 되는 그룹에서 관련 라이브러리를 제외할 수 있다.  
+> ```groovy
+> dependencies {
+>     testConf1('org.springframework.boot:spring-boot-starter-web') {
+>         exclude module: 'spring-boot-starter-logging'
+>     } 
+> }
+> ```
+
+### 환경 구성 정의
+> configurations 블록은 ConfigurationContainer 에 대하여 클로저로 실행되게 되어 있다.  
+> ConfigurationContainer 는 해당 프로젝트의 구성을 선언하고 관리하는 역할을 한다.  
+> 
+> 환경 구성은 다른 환경 구성을 상속할 수 있는데, 이럴 때는 `extendsFrom` 을 사용한다.
+
+---
+
