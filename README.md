@@ -1080,3 +1080,29 @@
 
 ---
 
+## 테스트 자동화
+### test 태스크
+> ```groovy
+> tasks.named('test') {
+>     outputs.dir snippetsDir
+>     // JUnit 사용
+>     useJUnitPlatform()
+>     
+>     // 테스트에서 제외 
+>     exclude '**/entity/**'
+>     exclude '**/repository/**'
+>     
+>     // 테스트를 위한 Heap 메모리 셋팅
+>     minHeapSize = "128m"
+>     maxHeapSize = "512m"
+>    
+>     // 병렬 테스트를 위한 프로세스 갯수 설정
+>     maxParallelForks = 4     
+> }
+> ```
+
+### Report 웹 페이지
+> SpringBoot + JUnit 을 사용하여 테스트 실행이 완료되면 `${projectDir}/build/reports/tests/test/index.html` 파일이 생성된다.  
+> 해당 파일을 열면 테스트 결과에 대한 리포트를 볼 수 있다.  
+
+---
