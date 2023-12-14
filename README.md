@@ -1105,4 +1105,18 @@
 > SpringBoot + JUnit 을 사용하여 테스트 실행이 완료되면 `${projectDir}/build/reports/tests/test/index.html` 파일이 생성된다.  
 > 해당 파일을 열면 테스트 결과에 대한 리포트를 볼 수 있다.  
 
+### 병렬 테스트
+> ```groovy
+> tasks.named('test') {
+>     ...    
+>     // 1.갯수를 직접 설정
+>     maxParallelForks = 4
+>     // 2.Gradle 구동 머신의 프로세스 수만큼 설정
+>     maxParallelForks = Runtime.runtime.availableProcessors()
+>     // 3.구동 머신의 프로세스 수의 1/2 만큼 설정
+>     maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1      
+> } 
+> ```
+> 주의: 단위 테스트만 있는 경우에는 gradlew 로 돌리든 인텔리제이로 돌리든 병렬 프로세스 사용보다 단일 프로세스 사용이 성능면에서 더 나았다.
+
 ---
