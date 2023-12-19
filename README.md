@@ -1120,3 +1120,135 @@
 > 주의: 단위 테스트만 있는 경우에는 gradlew 로 돌리든 인텔리제이로 돌리든 병렬 프로세스 사용보다 단일 프로세스 사용이 성능면에서 더 나았다.
 
 ---
+
+## 그레이들 퍼블리싱
+### 개요
+> 그레이들은 ZIP 형식을 비롯하여 tar, jar, war, ear 등 다양한 압축 방식을 제공한다.
+
+### zip
+> zip 압축 파일 생성 스크립트
+> ```groovy
+> task exeTask(type: Zip) {
+>     // 압축 파일 이름 지정
+>     baseName = "GradleZip"
+>     // 압축파일에 포함시키고자 하는 디렉터리 위치
+>     into("script") {
+>         from("src") {
+>             // 생성 포함 파일
+>             include "*.html", "*.js", "*.xml"
+>         } 
+>     }
+>     // 빈디렉터리 포함 여부 설정
+>     includeEmptyDirs = false
+> 
+>     // 압축 파일 생성 위치 지정
+>     destinationDir = file("zip")
+>     // 압축 파일 이름 지정(baseName 대신 사용 가능)
+>     archiveName = "Gradle.zip"
+> }
+> ```
+
+### jar
+> jar 압축 파일 생성을 위해서는 JAR 태스크에서 제공해주는 기능을 이용하게 되며 기본적으로는 앞에서 설명한 것처럼 zip 압축 파일 생성과 동일한 속성들이 
+> 사용된다.
+> ```groovy
+> // 프로젝트 버전 지정
+> version = 'Jar 1.0'
+> 
+> task exeTask(type: Jar) {
+>     // [baseName]-[appendix]-[version]-[classifier].[extension] 으로 지정된다. 이는 zip 과 동일하게 적용된다.
+>     destinationDir = file("NewJar")
+>     baseName = "Gradle"
+>     appendix = "file"
+>     classifier = "script"
+>     version = "1_0"
+>     
+>     // manifest 설정
+>     manifest {
+>         attributes("Built-By": "Gradle",
+>             "Implementation-Version" : project.version) 
+>     }
+>     // 압축 방식 지정
+>     entryCompression = ZipEntryCompression.STORED
+> } 
+> ```
+> manifest 는 프로젝트 또는 프로그램과 관련된 버전이나 의존성 등 내용을 포함한 부분으로, manifest 파일은 이러한 내용이 기재되어 있는 파일이다.
+> manifest 블록을 이용하여 빌드를 수행할 때 manifest 파일을 생성할 수 있다. 빌드를 수행하게 되면 프로젝트에 build 디렉터리가 생성되면서 해당 
+> 디렉터리 하위로 manifest 파일이 생성된다.
+> 
+> jar 압축 파일 생성 시 Jar 태스크를 이용하거나 java 플러그인을 사용하여 만든다.  
+
+### Distribution 플러그인을 이용한 압축
+> Distribution 플러그인을 사용하여 zip, tar 압축 파일을 생성하는 방법은 다음과 같다.
+> ```groovy
+> apply plugin 'distribution'
+> 
+> distribution {
+>     main {
+>         baseName = 'arcvName'
+>         contents {
+>             from { 'src' }
+>         }
+>     } 
+> }
+> ```
+
+### 파일 퍼블리싱
+> 압축 파일 생성을 통하여 나온 결과물을 로컬 저장소나 원격지로 퍼블리싱하는 방법으로 그레이들은 2가지의 플러그인을 사용한다.  
+> `maven-publish` 플러그인과 `ivy-publish` 플러그인이다.  
+> 
+> 퍼블리싱 작업 순서는 다음과 같다.  
+> 모듈 정의 -> 아티팩트 등록 -> 메타 데이터 편집 -> 퍼블리싱
+
+### 메이븐 퍼블리싱 플러그인
+> 선언
+> ```groovy
+> apply plugin 'maven-publish'
+> ```
+> 퍼블리싱을 수행하기 위하여 그레이들에서는 소프트웨어 컴포넌트(Software Component) 라는 개념을 사용하고 있다. 
+> 이 소프트웨어 컴포넌트라는 개념을 이용하여 프로젝트에 추가할 수 있으며 소프트웨어 컴포넌트에는 아티팩트(Artifact)와 의존 관계 관련 정보가 포함되어 있다. 
+> 즉, 소프트웨어 컴포넌트 지정을 통하여 그레이들은 메이븐 저장소나 기타 저장소에 퍼블리싱하기 위한 준비를 한다고 보면 된다.  
+> 
+> build.gradle
+> ```groovy
+> plugins {
+>     id 'java'
+>     id 'maven-publish'
+> }
+> 
+> group = 'com.example'
+> version = '1.0.0'
+> sourceCompatibility = '1.8'
+> 
+> repositories {
+> mavenCentral()
+> }
+> 
+> dependencies {
+> // 필요한 경우 의존성을 추가하세요
+> }
+> 
+> publishing {
+>     publications {
+>         mavenJava(MavenPublication) {
+>             from components.java
+>     
+>             artifactId = 'your-artifact-id' // 아티팩트 ID를 설정하세요
+>         }
+>     }
+> 
+>     repositories {
+>         maven {
+>             url = uri('https://your-maven-repo-url') // Maven 저장소 URL을 설정하세요
+>             credentials {
+>                 username = project.findProperty("mavenUsername") ?: System.getenv("MAVEN_USERNAME")
+>                 password = project.findProperty("mavenPassword") ?: System.getenv("MAVEN_PASSWORD")
+>             }
+>         }
+>     }
+> }
+> ```
+> 프로젝트 루트 디렉토리에서 `./gradlew publish` 명령어를 실행하면 Maven 저장소에 프로젝트가 성공적으로 게시된다.
+ 
+---
+
