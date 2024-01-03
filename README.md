@@ -206,7 +206,7 @@
 > 명령어 인수로 사용하려면 -D 옵션이나 --system-prop 옵션을 사용하여 그 뒤에 속성명과 속성값을 설정하면 된다.  
 > build.gradle
 > ```groovy
-> task hello {
+> tasks.register('hello') {
 >   println System.properties['message']
 > }
 > ```
@@ -238,7 +238,7 @@
 > ```
 > build.gradle
 > ```groovy
-> task hello {
+> tasks.register('hello') {
 >   println msg
 > }
 > ```
@@ -268,13 +268,13 @@
 ### 커스텀 Task
 > build.gradle 에서 다음과 같은 구조로 정의한다.
 > ```groovy
-> task <테스크 명> {
+> tasks.register('<테스크 명>') {
 >   // 내용
 > }
 > ```
 > 예시: 'hello world' 를 화면에 표시하는 테스크 'hello'
 > ```groovy
-> task hello {
+> tasks.register('hello') {
 >     println 'Hello world'
 > }
 > ```
@@ -283,7 +283,7 @@
 ### doFirst 와 doLast 
 > 태스크 내부에서 우선순위 블록을 만들고자 할 때 사용한다.
 > ```groovy
-> task <테스크 명> {
+> tasks.register('<테스크 명>') {
 >     doFirst {
 >           // 태스크 내에서 doLast 보다 먼저 처리할 내용
 >     }
@@ -295,7 +295,7 @@
 
 ### 파라미터 받기
 > ```groovy
-> task <테스크 명> {
+> tasks.register('<테스크 명>') {
 >   def <변수명> = <변수명>   // 변수 값이 문자인 경우
 >   def <변수명> = <변수명>.toInteger()   // 변수 값이 숫자인 경우
 > }
@@ -304,7 +304,7 @@
 > 
 > 예시
 > ```groovy
-> task calc {
+> tasks.register('calc') {
 >   def s = s
 >   def x = x.toInteger()
 >   def y = y.toInteger()
@@ -320,11 +320,11 @@
 ### Task 에서 변수 사용하기
 > Task 에서 사용자 정의 변수를 정의해서 사용이 가능하다.   
 > ```groovy
-> task hello {
+> tasks.register('hello') {
 >   ext.myProperty = 'hello property'
 > }
 > 
-> task helloPrint {
+> tasks.register('helloPrint') {
 >   doLast {
 >       println hello.myProperty
 >   }
@@ -337,25 +337,29 @@
 > 종료 태스크는 지정된 태스크에서 에러나 예외가 발생하더라도 실행된다. 
 > 단 해당 Task 의 doFirst 혹은 doLast 블록에 있는 내용이 dependsOn 및 finalizedBy 에 맞게 실행된다.  
 > ```groovy
-> task exeTask1 {
+> tasks.register('exeTask1') {
 >     doLast {
 >         throw new Exception()
 >     }
 > }
 > 
-> task exeTask2(dependsOn: 'exeTask1') {
+> tasks.register('exeTask2') {
+>     dependsOn: 'exeTask1'
+> 
 >     doLast {
 >         println 'exeTask 2'
 >     }
 > }
 > 
-> task exeTask3(dependsOn: 'exeTask2') {
+> tasks.register('exeTask3') {
+>     dependsOn: 'exeTask2'
+> 
 >     doLast {
 >         println 'exeTask 3'
 >     }
 > }
 > 
-> task finishTask {
+> tasks.register('finishTask') {
 >     doLast {
 >         println 'finish task~~~~~'
 >     }
@@ -385,6 +389,36 @@
 > `gradle bootJar` 의 경우 test 태스크 및 compileJava 태스트 등의 테스크가 실행된다.    
 > gradle bootJar 태스크에서 test 태스크와 compileJava 태스크를 제외하여 실행하고 싶으면 뒤에 `-x <task 명>`를 붙인다.    
 > 예시: `gradle bootJar -x test -x compileJava`  
+
+### tasks.named
+> **tasks.register**  
+> tasks.register 메서드는 새로운 태스크를 정의하고 등록하는 데 사용됩니다.
+> 이 메서드는 지연 초기화(lazy initialization)를 지원합니다. 즉, 태스크는 실제로 필요할 때까지 초기화되거나 구성되지 않습니다. 
+> 이는 빌드 성능을 향상시키는 데 유용합니다. 태스크가 실행되는 시점까지 태스크의 구성이 연기됩니다.
+> 예시:
+> ```groovy
+> Copy code
+> tasks.register("myTask") {
+>     doLast {
+>         println "This is a new task"
+>     }
+> }
+> ```
+> **tasks.named**  
+> tasks.named 메서드는 이미 존재하는 태스크를 참조하고 구성하는 데 사용됩니다.
+> 이 메서드 역시 지연 초기화를 지원합니다. 태스크의 구성을 변경하고자 할 때까지 실제 태스크 객체가 생성되지 않습니다.
+> 이미 정의된 태스크의 구성을 변경하거나 추가 설정을 하고자 할 때 주로 사용됩니다.
+> 예시:
+> ```groovy
+> Copy code
+> tasks.named("existingTask") {
+>     doLast {
+>         println "This is an existing task with new configuration"
+>     }
+> }
+> ```
+> tasks.register 는 새로운 태스크를 만들 때 사용되며, tasks.named 는 기존 태스크를 참조하고 그 설정을 변경할 때 
+> 사용됩니다. 둘 다 지연 초기화를 통해 Gradle 빌드 성능을 최적화하는 데 도움이 됩니다.
 
 ### 참조사이트
 > [Gradle task의 초간단 이해](https://sharplee7.tistory.com/7)
@@ -619,7 +653,7 @@
 >     id "org.asciidoctor.jvm.convert" version '3.3.2'
 > }
 > 
-> bootJar {
+> tasks.named('bootJar') {
 >     layered
 >     dependsOn asciidoctor
 >     copy {
@@ -629,7 +663,7 @@
 >     finalizedBy 'copyDocument'
 > }
 > 
-> task copyDocument(type: Copy) {
+> tasks.register('copyDocument', Copy) {
 >     dependsOn bootJar
 >     from file("src/docs/asciidoc")
 >     into file("src/main/resources/static/docs")
@@ -643,14 +677,13 @@
 > ext {
 >     snippetsDir = file('build/generated-snippets')
 > }
-> 
-> asciidoctor {
+>
+> tasks.named('asciidoctor') {
 >     inputs.dir snippetsDir
 >     dependsOn test
-> }
-> 
-> asciidoctor.doFirst {
->     delete file('src/main/resources/static/docs')
+>     doFirst {
+>         delete file('src/main/resources/static/docs')
+>     }
 > }
 > ```
 
@@ -914,7 +947,7 @@
 ### 태스크를 이용한 파일 복사
 > ```groovy
 > // type 에 copy 를 지정해야 한다.
-> task copyTask(type: Copy) {
+> tasks.register("copyTask", Copy) {
 >     // 디렉터리 생성
 >     mkdir 'dest'
 > 
@@ -933,7 +966,7 @@
 
 ### 파일 삭제
 > ```groovy
-> task delFile(type: Delete) {
+> tasks.register('delFile', Delete) {
 >     delete 'src/com/org/original.java', 'src/com/org/originalDao.java'
 >     // 심볼릭 링크 사용 여부 설정
 >     followSymlinks = true
@@ -1128,7 +1161,7 @@
 ### zip
 > zip 압축 파일 생성 스크립트
 > ```groovy
-> task exeTask(type: Zip) {
+> tasks.register('exeTask', Zip) {
 >     // 압축 파일 이름 지정
 >     baseName = "GradleZip"
 >     // 압축파일에 포함시키고자 하는 디렉터리 위치
@@ -1155,7 +1188,7 @@
 > // 프로젝트 버전 지정
 > version = 'Jar 1.0'
 > 
-> task exeTask(type: Jar) {
+> tasks.register('exeTask', Jar) {
 >     // [baseName]-[appendix]-[version]-[classifier].[extension] 으로 지정된다. 이는 zip 과 동일하게 적용된다.
 >     destinationDir = file("NewJar")
 >     baseName = "Gradle"
@@ -1266,3 +1299,164 @@
 
 ---
 
+## 그레이들 구조화
+### 사용자 정의 태스크
+> ```groovy
+> tasks.register('userTask', DefaultTask) {
+>     ...
+> }
+> ```
+> 위와 같이 태스크 이름 뒤에 DefaultTask 클래스를 지정하였다. 만약 저 부분을 지정하지 않았다면 내부적으로 DefaultTask 가 지정된다.
+> 위의 형식을 이용하여 빌드 수행 시 추가로 사용자 정의 객체를 type 으로 지정하여 사용할 수 있다.
+> 
+> ```groovy
+> // 사용자 정의 태스크
+> tasks.register('calcuTask', CalcuGradle) {
+>     msg = "Customer Task Test"
+>     printMsg(msg)
+> 
+>     def a = 5
+>     def b = 10
+> 
+>     plus(a, b)
+>     minus(a, b)
+>     multi(a, b)
+>     div(a, b)
+> }
+> 
+> // 태스크 클래스 정의
+> class CalcuGradle extends DefaultTask {
+> // 변수 선언
+> @Input
+> String msg
+> 
+>     // 클래스 생성자
+>     CalcuGradle() {
+>         doLast {
+>             println "Calcu Start, $msg!"
+>         }
+>     }
+> 
+>     void printMsg(String str) {
+>         doLast {
+>             println "Alzio Contents: $str"
+>         }
+>     }
+> 
+>     void plus(int a, int b) {
+>         doLast {
+>             println "a+b = " + (a+b)
+>         }
+>     }
+>     void minus(int a, int b) {
+>         doLast {
+>             println "a-b = " + (a-b)
+>         }
+>     }
+>     void multi(int a, int b) {
+>         doLast {
+>             println "a*b = " + (a*b)
+>         }
+>     }
+>     void div(int a, int b) {
+>         doLast {
+>             println "a/b = " + (a/b)
+>         }
+>     }
+> } 
+> ```
+> calcuTask 태스크에 type 속성으로 CalcuGradle 클래스가 지정된 것을 확인할 수 있다.
+
+### 사용자 정의 플러그인
+> 사용자 정의 플러그인은 다음 같은 경우에 사용할 수 있다.
+> * 다른 프로젝트에서 작성한 사용자 정의 태스크를 공유하여 사용할 때
+> * 여러 개의 태스크를 조합하여 사용할 때
+> * 파일, 설정 방법 등 새로운 규칙 및 방법을 정의하여 빌드 수행에 적용하고자 할 때
+> 
+> 플러그인을 만들어 사용하려면 `Plugin` 인터페이스를 구현하여 사용자 정의 플러그인을 작성해야 한다.
+> ```groovy
+> apply plugin: GradleUserPlugin
+> 
+> // 사용자 정의 플러그인
+> class GradleUserPlugin implements Plugin<Project> {
+> 
+>     // 플러그인 적용시 호출
+>     @Override
+>     void apply(Project target) {
+>         // 태스크 추가 정의
+>         target.tasks.register("exeTask1") {
+>             doLast {
+>                 println "This is Customer Plug-in -exeTask1"
+>             }
+>         }
+>         target.tasks.register("exeTask2") {
+>             doLast {
+>                 println "This is Customer Plug-in -exeTask2"
+>             }
+>         }
+>     }
+> }
+> 
+> tasks.register("myExeTask") {
+>     dependsOn "exeTask1"
+> 
+>     doLast {
+>         println "This is Customer Plug-in -myExeTask"
+>     }
+> }
+> ```
+> 
+> 그레이들은 플러그인의 설정 정보를 세팅할 수 있게 관련 블록을 제공한다. 예를 들어 java 플러그인을 사용한다면
+> jar 블록을 이용하여 자바와 관련된 속성을 지정할 수 있다.
+> ```groovy
+> apply plugin "java"
+> 
+> jar {
+>     // java 플러그인 apply 시 자바 관련 속성 지정
+>     ...
+> }
+> ```
+>
+> ```groovy
+> // 사용자 정의 플러그인 적용
+> apply plugin: GradleUserPlugin
+> 
+> // 사용자 정의 블럭을 통한 속성값 지정
+> prop {
+>     outPutContents("www.gradle.org", "10.1.1.152")
+> }
+> 
+> // 사용자 정의 플러그인
+> class GradleUserPlugin implements Plugin<Project> {
+> 
+>     // 플러그인 적용시 호출
+>     @Override
+>     void apply(Project target) {
+>         target.extensions.create('prop', GradleProperties)
+> 
+>         // 태스크 추가 정의
+>         target.tasks.register("exeTask1") {
+>             doLast {
+>                 println "${project.prop.domain}, ${project.prop.ipAddr}"
+>             }
+>         }
+>     }
+> }
+> 
+> class GradleProperties {
+>     String domain
+>     String ipAddr
+> 
+>     void outPutContents(domain, ipAddr) {
+>         this.domain = domain
+>         this.ipAddr = ipAddr
+>     }
+> }
+> 
+> tasks.register('showResult') {
+>     doFirst {
+>         println '========== showResult Task ========='
+>     }
+>     finalizedBy 'exeTask1'
+> }
+> ```

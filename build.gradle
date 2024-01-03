@@ -1,22 +1,41 @@
-configurations {
-    confDef
+// 사용자 정의 플러그인 적용
+apply plugin: GradleUserPlugin
+
+// 사용자 정의 블럭을 통한 속성값 지정
+prop {
+    outPutContents("www.gradle.org", "10.1.1.152")
 }
 
-// 변경성 모듈에 대한 캐시 간격 지정
-configurations.confDef.resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
-configurations.confDef.resolutionStrategy.cacheChangingModulesFor 10, 'hours'
+// 사용자 정의 플러그인
+class GradleUserPlugin implements Plugin<Project> {
 
-// 저장소 정의
-repositories {
-    mavenCentral()
+    // 플러그인 적용시 호출
+    @Override
+    void apply(Project target) {
+        target.extensions.create('prop', GradleProperties)
+
+        // 태스크 추가 정의
+        target.tasks.register("exeTask1") {
+            doLast {
+                println "${project.prop.domain}, ${project.prop.ipAddr}"
+            }
+        }
+    }
 }
 
-// 의존 관계 정의
-dependencies {
-    // 1.x 버전 중 최신 버전에 대한 지정
-    confDef 'org.slf4j:slf4j-api:1.+'
-    // 출시 버전 중 최신 버전에 대한 지정
-    confDef 'commons-cli:commons-cli:latest.integration'
-    // 배포된 버전 중 최신 버전에 대한 지정
-    confDef 'junit:junit:latest.release'
+class GradleProperties {
+    String domain
+    String ipAddr
+
+    void outPutContents(domain, ipAddr) {
+        this.domain = domain
+        this.ipAddr = ipAddr
+    }
+}
+
+tasks.register('showResult') {
+    doFirst {
+        println '========== showResult Task ========='
+    }
+    finalizedBy 'exeTask1'
 }
