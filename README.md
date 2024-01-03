@@ -653,22 +653,6 @@
 >     id "org.asciidoctor.jvm.convert" version '3.3.2'
 > }
 > 
-> tasks.named('bootJar') {
->     layered
->     dependsOn asciidoctor
->     copy {
->         from '${asciidoctor.outputDir}'
->         into 'BOOT-INF/classes/static/docs'
->     }
->     finalizedBy 'copyDocument'
-> }
-> 
-> tasks.register('copyDocument', Copy) {
->     dependsOn bootJar
->     from file("src/docs/asciidoc")
->     into file("src/main/resources/static/docs")
-> }
-> 
 > dependencies {
 >     ...
 >     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc:2.0.6.RELEASE'
@@ -678,12 +662,38 @@
 >     snippetsDir = file('build/generated-snippets')
 > }
 >
+> tasks.named('compileJava') {
+>     dependsOn copyResources
+> }
+> 
+> tasks.named('bootJar') {
+>     layered
+>     dependsOn asciidoctor
+>     // asciidoctor
+>     copy {
+>         from '${asciidoctor.outputDir}'
+>         into 'BOOT-INF/classes/static/docs'
+>     }
+>     finalizedBy 'copyDocument'
+> }
+> 
 > tasks.named('asciidoctor') {
 >     inputs.dir snippetsDir
 >     dependsOn test
 >     doFirst {
 >         delete file('src/main/resources/static/docs')
 >     }
+> }
+> 
+> tasks.register('copyResources', Copy) {
+>     from "${projectDir}/src/main/resources"
+>     into "${buildDir}/resources/main"
+> }
+> 
+> tasks.register('copyDocument', Copy) {
+>     dependsOn bootJar
+>     from file("src/main/asciidoc")
+>     into file("src/main/resources/static/docs")
 > }
 > ```
 
