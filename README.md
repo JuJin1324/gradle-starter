@@ -1470,3 +1470,22 @@
 >     finalizedBy 'exeTask1'
 > }
 > ```
+
+---
+
+## 스프링 부트와 그레이들
+### 스크립트 파일 종류
+> gradle 디렉터리 하위에 다양한 스크립트 파일을 위치시킬 수 있는데 다음과 같다.
+> * default.gradle: 프로젝트 공통적인 설정 정보
+> * archive.gradle: Resource 자원 관리 및 아카이브 관련 설정 정보 등
+> * versioning.gradle: 버전과 관련된 내용
+> * maven.gradle: 프로젝트 결과물 또는 관련 라이브러리 업로드 위한 메이븐 정보
+> * sonar.gradle: Sonar 접근 정보
+> * environment.gradle: 환경 변수 관련 정보
+>
+> default.gradle 을 build.gradle 에 적용하는 방법
+> ```groovy
+> apply from: "./gradle/default.gradle"
+> ```
+
+---
