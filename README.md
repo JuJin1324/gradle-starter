@@ -742,9 +742,17 @@
 > ```
 
 ### SpringBoot plugin
-> group: TODO  
-> version: TODO  
-> sourceCompatibility: TODO
+> ```groovy
+> plugins {
+>     id 'java'
+>     id 'org.springframework.boot' version '2.7.14'
+>     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+>     ...
+> }
+> 
+> group = 'com.example'
+> version = '0.0.1'
+> ```
 > 
 > spring dependency 에서 로깅 라이브러리 제거  
 > ```groovy
@@ -755,6 +763,46 @@
 >     }
 > }
 > ```
+
+### checkstyle plugin
+> Checkstyle은 Java 소스 코드에 대해 정적 분석을 수행하는 도구로, 코드 스타일과 코딩 규칙을 강제하는 데 사용됩니다. 
+> Gradle에서 Checkstyle 플러그인을 사용하면 프로젝트의 빌드 과정에 자동으로 코드 스타일 검사를 포함할 수 있습니다. 
+> 이를 통해 코드가 일관된 스타일을 유지하도록 하며, 잠재적인 오류를 미리 찾아낼 수 있습니다.
+> 
+> **적용**  
+> 1. 프로젝트 Root 에 `checkstyle` 디렉터리를 생성
+> 2. checkstyle.xml 파일을 구글링하여 다운로드 후 checkstyle 디렉터리로 이동. 여기선 naver checkstyle 을 다운받아 사용함.  
+> 3. build.gradle 에 다음 내용 추가
+> ```groovy
+> plugins {
+>     id 'checkstyle'
+> }
+> ...
+> 
+> checkstyle {
+>     // 네이버 체크스타일 룰 사용
+>     configFile = file("checkstyle/naver-checkstyle-rules.xml")
+>     configProperties = ["suppressionFile": "checkstyle/naver-checkstyle-suppressions.xml"]
+>     sourceSets = [sourceSets.main] // CompileQuerydsl 오류 해결
+> }
+> 
+> checkstyleMain.source = fileTree('src/main/java')
+> 
+> // checkstyle 에서 제외 시킬 클래스 지정
+> checkstyleMain
+>     .exclude('com/example/ExcludeExample1.java')
+>     .exclude('com/example/exclude/*.java')
+> ```
+> 4. `gradle build` 명령어 실행
+> 5. `프로젝트 루트/build/reports/checkstyle/main.html` 을 열어서 결과 확인
+> 
+> **IntelliJ 에 checkstyle 적용하기**  
+> Preferences(Command + ,) 이동 -> Editor/Code Style/Java 이동 -> Scheme 옆에 세로 점 3개 아이콘 클릭 후 Import Scheme 
+> -> IntelliJ IDEA code style XML 클릭 -> 아래 참조사이트를 통해서 다운받은 naver-intellij-formatter.xml 선택
+> 
+> **참조사이트**  
+> [Gradle Project에 checkstyle 설정하기](https://dukcode.github.io/cicd/setting-checkstyle/)  
+> [naver/hackday-conventions-java](https://github.com/naver/hackday-conventions-java)  
 
 ---
 
