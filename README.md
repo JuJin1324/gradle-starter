@@ -804,6 +804,95 @@
 > [Gradle Project에 checkstyle 설정하기](https://dukcode.github.io/cicd/setting-checkstyle/)  
 > [naver/hackday-conventions-java](https://github.com/naver/hackday-conventions-java)  
 
+### JaCoCo plugin
+> JaCoCo는 Java 코드의 커버리지를 체크하는 라이브러리입니다. 
+> 테스트코드를 돌리고 그 커버리지 결과를 눈으로 보기 좋도록 html이나 xml, csv 같은 리포트로 생성합니다. 
+> 그리고 테스트 결과가 내가 설정한 커버리지 기준을 만족하는지 확인하는 기능도 있습니다.
+> 
+> **build.gradle**    
+> ```groovy
+> plugins {
+>     id 'jacoco'
+> }
+> 
+> jacoco {
+>     // JaCoCo 버전
+>     toolVersion = '0.8.5'
+>     
+>     //  테스트결과 리포트를 저장할 경로 변경
+>     //  default는 "$/jacoco"
+>     //  reportsDir = file("$buildDir/customJacocoReportDir")
+> }
+> ```
+> 
+> **Gradle task 설정 – 테스트 리포트 저장과 커버리지 체크**  
+> JaCoCo Gradle 플러그인에는 jacocoTestReport와 jacocoTestCoverageVerification task가 있습니다.
+> 
+> jacocoTestReport: 바이너리 커버리지 결과를 사람이 읽기 좋은 형태의 리포트로 저장합니다. 
+> html 파일로 생성해 사람이 쉽게 눈으로 확인할 수도 있고, SonarQube 등으로 연동하기 위해 xml, csv 같은 형태로도 리포트를 생성할 수 있습니다.
+> jacocoTestCoverageVerification: 내가 원하는 커버리지 기준을 만족하는지 확인해 주는 task입니다. 
+> 예를 들어, 브랜치 커버리지를 최소한 80% 이상으로 유지하고 싶다면, 이 task에 설정하면 됩니다. test task처럼 Gradle 빌드의 성공/실패로 결과를 보여줍니다.
+> 
+> ```groovy
+> tasks.named('test') {
+>     ...
+>     finalizedBy 'jacocoTestReport'
+> }
+> 
+> tasks.named('jacocoTestReport') {
+>     reports {
+>         // 원하는 리포트를 켜고 끌 수 있습니다.
+>         html.required = true
+>         xml.required = false
+>         csv.required = false
+>         
+>         //  각 리포트 타입 마다 리포트 저장 경로를 설정할 수 있습니다.
+>         //  html.destination file("$buildDir/jacocoHtml")
+>         //  xml.destination file("$buildDir/jacoco.xml")
+> 
+>         finalizedBy 'jacocoTestCoverageVerification'
+>     }
+> }
+> 
+> tasks.named('jacocoTestCoverageVerification') {
+>     violationRules {
+>         rule {
+>             element = 'CLASS'
+>             
+>              limit {
+>                   counter = 'BRANCH'
+>                   value = 'COVEREDRATIO'
+>                   minimum = 0.90
+>              }
+>              // 커버리지 체크를 제외할 클래스들
+>              excludes = [
+>                 '*.test.*',
+>                 '*.Kotlin*'
+>              ]
+>         }
+>     }
+> }
+> ```
+> JaCoCo 플러그인은 자동으로 모든 Test 타입의 task에 JacocoTaskExtension을 추가하고, 
+> test task에서 그 설정을 변경할 수 있게 합니다. (JaCoCo specific task configuration) 
+> 그래서 아래 설정처럼 test task에서 extension을 설정할 수 있습니다. 
+> 아래 설정은 커버리지 결과 데이터를 저장할 경로를 변경하는 것이고, unit test와 integration test 등을 분리할 때 
+> 사용하면 유용할 수 있습니다.
+> 
+> ```groovy
+> test {
+>     jacoco {
+>         destinationFile = file("$buildDir/jacoco/jacoco.exec")
+>     }
+> }
+> ```
+> 
+> **참조사이트**  
+> [Gradle 프로젝트에 JaCoCo 설정하기](https://techblog.woowahan.com/2661/)
+
+### Docker plugin
+> TODO
+
 ---
 
 ## Deploy
